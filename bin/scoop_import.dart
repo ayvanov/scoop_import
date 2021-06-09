@@ -21,8 +21,8 @@ void main(List<String> arguments) async {
           buckets.add(bucket);
         }
       }
-      // print(apps.toString());
-      // print(buckets.toString());
+
+      //print(apps.toString()); print(buckets.toString());
     }
     if (buckets.isNotEmpty) {
       for (var bucket in buckets) {
