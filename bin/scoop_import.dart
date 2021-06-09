@@ -1,6 +1,15 @@
 import 'dart:io' show Process, File;
 import 'package:args/args.dart';
 
+void runScoop(List<String> args) async {
+  final process = await Process.run('powershell', ['scoop', ...args]);
+  if (process.exitCode == 0) {
+    print(process.stdout);
+  } else {
+    print(process.stderr);
+  }
+}
+
 void main(List<String> arguments) async {
   final argParser = ArgParser();
   final args = argParser.parse(arguments);
@@ -21,29 +30,16 @@ void main(List<String> arguments) async {
           buckets.add(bucket);
         }
       }
-
-      //print(apps.toString()); print(buckets.toString());
     }
     if (buckets.isNotEmpty) {
       for (var bucket in buckets) {
-        final process =
-            await Process.run('powershell', ['scoop', 'bucket', 'add', bucket]);
-        if (process.exitCode == 0) {
-          print(process.stdout);
-        } else {
-          print(process.stderr);
-        }
+        runScoop(['install', 'git']);
+        runScoop(['bucket', 'add', bucket]);
       }
     }
     if (apps.isNotEmpty) {
       for (var app in apps) {
-        final process =
-            await Process.run('powershell', ['scoop', 'install', app]);
-        if (process.exitCode == 0) {
-          print(process.stdout);
-        } else {
-          print(process.stderr);
-        }
+        runScoop(['install', app]);
       }
     }
   }
