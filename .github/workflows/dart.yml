@@ -28,9 +28,12 @@ jobs:
       - name: Compile exe
         run: dart compile exe bin/scoop_import.dart -o scoop-import.exe
       
+      - name: Generate checksum
+        run:  $(CertUtil -hashfile d:\a\scoop_import\scoop_import\scoop-import.exe SHA256)[1] -replace " ","" > d:\a\scoop_import\scoop_import\checksum.txt
+      
       - name: GH Release
         uses: softprops/action-gh-release@v0.1.5
         with:
-          files: d:\a\scoop_import\scoop_import\scoop-import.exe
+          files: d:\a\scoop_import\scoop_import\scoop-import.exe | d:\a\scoop_import\scoop_import\checksum.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
