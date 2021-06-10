@@ -1,3 +1,3 @@
 [![Dart](https://github.com/ayvanov/scoop_import/actions/workflows/dart.yml/badge.svg)](https://github.com/ayvanov/scoop_import/actions/workflows/dart.yml)
 
-A simple command-line application.
+[Scoop](https://github.com/lukesampson/scoop) "import" command implemented in Dart
