@@ -31,6 +31,6 @@ jobs:
       - name: GH Release
         uses: softprops/action-gh-release@v0.1.5
         with:
-          files: d:\a\scoop_import\scoop_import\bin\scoop-import.exe
+          files: d:\a\scoop_import\scoop_import\scoop-import.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
