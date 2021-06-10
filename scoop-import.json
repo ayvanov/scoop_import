@@ -7,9 +7,7 @@
             "scoop-import"
         ]
     ],
-    "hash": {
-        "url": "https://github.com/ayvanov/scoop_import/releases/download/v0.1.9/checksum.txt"
-    },
+    "hash": "638d2a6dde36d92ed299bd772e0c7c9a3de7ca88f70d63087df6b24aa52a1bf9",
     "homepage": "https://github.com/ayvanov/scoop_import",
     "checkver": "github",
     "description": "Scoop 'import' command implemented in Dart",
