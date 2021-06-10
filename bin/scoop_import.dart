@@ -129,7 +129,7 @@ void main(List<String> arguments) async {
   } else {
     print('WARN: [file] is missing');
     print(
-        'ERROR: Cannot find exported file in default locations: .\$appsListFileName or $appsListFilePath');
+        'ERROR: Cannot find exported file in default locations: .\\$appsListFileName or $appsListFilePath');
     print('Usage: scoop export > .scoop; Then: scoop-import [file]');
   }
 }
