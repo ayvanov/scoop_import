@@ -1,23 +1,84 @@
-import 'dart:io' show Process, File;
+import 'dart:io' show File, Process, ProcessResult, stdout, exit;
 import 'package:args/args.dart';
 
-Future runScoop(List<String> args) async {
-  final process = await Process.run('powershell', ['scoop', ...args]);
-  if (process.exitCode == 0) {
-    print(process.stdout);
-  } else {
-    print(process.stderr);
+class Scoop {
+  static Future<ProcessResult> run(List<String> args,
+      {bool silent = false}) async {
+    final process = await Process.run('powershell', ['scoop', ...args]);
+    if (process.exitCode == 0) {
+      if (!silent) print(process.stdout);
+    } else {
+      if (!silent) print(process.stderr);
+    }
+    return process;
+  }
+
+  static Future<bool> isCanRun() async {
+    final run = await Scoop.run([], silent: true),
+        error = run.stderr.toString();
+    if (error.isNotEmpty) {
+      if (error.contains("'powershell' is not recognized")) {
+        print('Powershell is not installed.');
+      }
+      if (error.contains("'scoop' is not recognized")) {
+        print('Scoop is not installed.');
+      }
+      return false;
+    }
+    return true;
+  }
+
+  static Future install(String app, {bool silent = false}) async {
+    if (!silent) stdout.write('Installing ${app.split('/').last}...');
+    final run = await Scoop.run(['install', app], silent: true),
+        response = run.stdout.toString(),
+        error = run.stderr.toString();
+    if (!silent && response.isNotEmpty) {
+      if (response.contains('is already installed')) {
+        stdout.write('Skipped.\n');
+      } else {
+        stdout.write('Done.\n');
+      }
+    }
+    if (error.isNotEmpty) {
+      print(error);
+    }
+  }
+
+  static Future bucket(String command, String bucket) async {
+    if (command == 'add') {
+      stdout.write('Adding $bucket bucket...');
+    }
+    final run = await Scoop.run(['bucket', command, bucket], silent: true),
+        response = run.stdout.toString(),
+        error = run.stderr.toString();
+    if (response.isNotEmpty) {
+      if (response.contains('bucket already exists')) {
+        stdout.write('Skipped.\n');
+      } else {
+        stdout.write('Done.\n');
+      }
+    }
+    if (error.isNotEmpty) {
+      print(error);
+    }
   }
 }
 
 void main(List<String> arguments) async {
+  final canRun = await Scoop.isCanRun();
+  if (!canRun) exit(1);
   final argParser = ArgParser();
   final args = argParser.parse(arguments);
+  var path = '.scoop';
   if (args.rest.isNotEmpty) {
-    final path = args.rest.toList().first;
+    path = args.rest.toList().first;
+  }
+  if (path.isNotEmpty) {
     final file = File(path);
     final buckets = <String>{};
     final apps = <String>[];
+
     if (file.existsSync()) {
       final bytes = file.readAsBytesSync();
       final lines =
@@ -38,20 +99,21 @@ void main(List<String> arguments) async {
           }
         }
       }
-    }
-    if (buckets.isNotEmpty) {
-      //TODO check if installed
-      await runScoop(['install', 'git']);
-      for (var bucket in buckets) {
-        //TODO check if added
-        await runScoop(['bucket', 'add', bucket]);
+
+      if (buckets.isNotEmpty) {
+        await Scoop.install('git', silent: true);
+        for (var bucket in buckets) {
+          await Scoop.bucket('add', bucket);
+        }
       }
-    }
-    if (apps.isNotEmpty) {
-      for (var app in apps) {
-        //TODO check if installed
-        await runScoop(['install', app]);
+
+      if (apps.isNotEmpty) {
+        for (var app in apps) {
+          await Scoop.install(app);
+        }
       }
+    } else {
+      print('Cannot find $file');
     }
   }
 }
