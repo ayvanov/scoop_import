@@ -4,7 +4,11 @@ import 'package:args/args.dart';
 class Scoop {
   static Future<ProcessResult> run(List<String> args,
       {bool silent = false}) async {
-    final process = await Process.run('powershell', ['scoop', ...args]);
+    final arguments = ['scoop'];
+    if (args.isNotEmpty) {
+      arguments.addAll(args);
+    }
+    final process = await Process.run('powershell', arguments);
     if (process.exitCode == 0) {
       if (!silent) print(process.stdout);
     } else {
@@ -14,7 +18,7 @@ class Scoop {
   }
 
   static Future<bool> isCanRun() async {
-    final run = await Scoop.run([], silent: true),
+    final run = await Scoop.run(['info'], silent: true),
         error = run.stderr.toString();
     if (error.isNotEmpty) {
       if (error.contains("'powershell' is not recognized")) {
@@ -86,7 +90,6 @@ void main(List<String> arguments) async {
       file = File(appsListFilePath);
     }
   }
-
   if (fileExists || file.existsSync()) {
     final buckets = <String>{};
     final apps = <String>[];
@@ -124,6 +127,9 @@ void main(List<String> arguments) async {
       print('Nothing to import.');
     }
   } else {
-    print('Cannot find $file');
+    print('WARN: [file] is missing');
+    print(
+        'ERROR: Cannot find exported file in default locations: .\$appsListFileName or $appsListFilePath');
+    print('Usage: scoop export > .scoop; Then: scoop-import [file]');
   }
 }
