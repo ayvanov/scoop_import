@@ -1,6 +1,6 @@
 {
-    "version": "v0.1.8",
-    "url": "https://github.com/ayvanov/scoop_import/releases/download/v0.1.8/scoop-import.exe",
+    "version": "v0.1.9",
+    "url": "https://github.com/ayvanov/scoop_import/releases/download/v0.1.9/scoop-import.exe",
     "bin": [
         [
             "scoop-import.exe",
@@ -8,7 +8,7 @@
         ]
     ],
     "hash": {
-        "url": "https://github.com/ayvanov/scoop_import/releases/download/v0.1.8/checksum.txt"
+        "url": "https://github.com/ayvanov/scoop_import/releases/download/v0.1.9/checksum.txt"
     },
     "homepage": "https://github.com/ayvanov/scoop_import",
     "checkver": "github",
