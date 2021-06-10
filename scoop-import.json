@@ -1,0 +1,12 @@
+{
+    "version": "v0.1.4",
+    "url": "https://github.com/ayvanov/scoop_import/releases/download/v0.1.4/scoop-import.exe",
+    "bin": [
+        [
+            "scoop-import.exe",
+            "scoop-import"
+        ]
+    ],
+    "homepage": "https://github.com/ayvanov/scoop_import",
+    "description": "Scoop 'import' command implemented in Dart"
+}
