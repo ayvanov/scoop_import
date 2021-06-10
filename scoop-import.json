@@ -10,5 +10,8 @@
     "hash": "dc4a79897918c1444b25712128b7957cefbbdee8a7d010d1cf11ed209296f73d",
     "homepage": "https://github.com/ayvanov/scoop_import",
     "description": "Scoop 'import' command implemented in Dart",
-    "license": "Apache-2.0"
+    "license": "Apache-2.0",
+    "autoupdate": {
+        "url": "https://github.com/ayvanov/scoop_import/releases/download/$version/scoop-import.exe"
+    }
 }
