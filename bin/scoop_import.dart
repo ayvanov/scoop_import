@@ -1,4 +1,4 @@
-import 'dart:io' show File, Process, ProcessResult, stdout, exit;
+import 'dart:io' show File, Process, ProcessResult, stdout, exit, Platform;
 import 'package:args/args.dart';
 
 class Scoop {
@@ -68,52 +68,62 @@ class Scoop {
 void main(List<String> arguments) async {
   final canRun = await Scoop.isCanRun();
   if (!canRun) exit(1);
+
+  var appsListFileName = '.scoop';
+  final appsListFilePath =
+      Platform.environment['USERPROFILE'].toString() + '\\$appsListFileName';
+  var file;
+  var fileExists = false;
   final argParser = ArgParser();
   final args = argParser.parse(arguments);
-  var path = '.scoop';
+
   if (args.rest.isNotEmpty) {
-    path = args.rest.toList().first;
+    file = File(args.rest.toList().first);
+  } else {
+    file = File(appsListFileName);
+    fileExists = file.existsSync();
+    if (!fileExists) {
+      file = File(appsListFilePath);
+    }
   }
-  if (path.isNotEmpty) {
-    final file = File(path);
+
+  if (fileExists || file.existsSync()) {
     final buckets = <String>{};
     final apps = <String>[];
-
-    if (file.existsSync()) {
-      final bytes = file.readAsBytesSync();
-      final lines =
-          String.fromCharCodes(bytes.buffer.asUint16List()).split('\n');
-      for (var line in lines) {
-        final split = line.split(' ');
-        if (split.length == 3) {
-          final bucket = split[2].substring(1, split[2].length - 2);
-          final app = split[0];
-          final skip = [1058995764, 872292574].contains(split[0][0].hashCode);
-          if (!skip) {
-            if (bucket != 'main') {
-              apps.add([bucket, app].join('/'));
-              buckets.add(bucket);
-            } else {
-              apps.add(app);
-            }
+    final bytes = file.readAsBytesSync();
+    final lines = String.fromCharCodes(bytes.buffer.asUint16List()).split('\n');
+    for (var line in lines) {
+      final split = line.split(' ');
+      if (split.length == 3) {
+        final bucket = split[2].substring(1, split[2].length - 2);
+        final app = split[0];
+        final skip = [1058995764, 872292574].contains(split[0][0].hashCode);
+        if (!skip) {
+          if (bucket != 'main') {
+            apps.add([bucket, app].join('/'));
+            buckets.add(bucket);
+          } else {
+            apps.add(app);
           }
         }
       }
+    }
 
-      if (buckets.isNotEmpty) {
-        await Scoop.install('git', silent: true);
-        for (var bucket in buckets) {
-          await Scoop.bucket('add', bucket);
-        }
+    if (buckets.isNotEmpty) {
+      await Scoop.install('git', silent: true);
+      for (var bucket in buckets) {
+        await Scoop.bucket('add', bucket);
       }
+    }
 
-      if (apps.isNotEmpty) {
-        for (var app in apps) {
-          await Scoop.install(app);
-        }
+    if (apps.isNotEmpty) {
+      for (var app in apps) {
+        await Scoop.install(app);
       }
     } else {
-      print('Cannot find $file');
+      print('Nothing to import.');
     }
+  } else {
+    print('Cannot find $file');
   }
 }
