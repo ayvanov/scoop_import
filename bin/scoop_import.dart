@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:http/http.dart' as http;
 import 'dart:io' show File, Process, ProcessResult, stdout, exit, Platform;
 import 'package:args/args.dart';
 
@@ -74,40 +77,65 @@ void main(List<String> arguments) async {
   if (!canRun) exit(1);
 
   var appsListFileName = '.scoop';
-  final appsListFilePath =
-      Platform.environment['USERPROFILE'].toString() + '\\$appsListFileName';
+  final userHome = Platform.environment['USERPROFILE'].toString();
+  final appsListFilePath = userHome + '\\$appsListFileName';
   var file;
   var fileExists = false;
+  var bytes = Uint8List(0);
   final argParser = ArgParser();
-  final args = argParser.parse(arguments);
+  final restArgs = argParser.parse(arguments).rest;
 
-  if (args.rest.isNotEmpty) {
-    file = File(args.rest.toList().first);
+  if (restArgs.isNotEmpty) {
+    var uri = Uri.parse(restArgs.first);
+    if (['http', 'https'].contains(uri.scheme.toLowerCase())) {
+      final response = await http.get(uri);
+      if (response.statusCode != 200) {
+        print('ERROR: ${response.reasonPhrase}');
+        exit(1);
+      }
+      if (response.contentLength! > 0) {
+        bytes = response.bodyBytes;
+      }
+    } else {
+      file = File(restArgs.first);
+      fileExists = file.existsSync();
+      if (!fileExists) {
+        print('ERROR: File does not exists: ${restArgs.first}');
+        exit(1);
+      }
+    }
   } else {
     file = File(appsListFileName);
     fileExists = file.existsSync();
     if (!fileExists) {
       file = File(appsListFilePath);
+      fileExists = file.existsSync();
+      if (fileExists) {
+        print('Using $appsListFilePath file');
+      }
+    } else {
+      print('Using $appsListFileName file');
     }
   }
-  if (fileExists || file.existsSync()) {
+  if (bytes.isEmpty && fileExists) {
+    bytes = file.readAsBytesSync();
+  }
+  if (bytes.isNotEmpty) {
     final buckets = <String>{};
     final apps = <String>[];
-    final bytes = file.readAsBytesSync();
     final lines = String.fromCharCodes(bytes.buffer.asUint16List()).split('\n');
     for (var line in lines) {
       final split = line.split(' ');
       if (split.length == 3) {
+        //TODO regexp cleanup
         final bucket = split[2].substring(1, split[2].length - 2);
         final app = split[0];
-        final skip = [1058995764, 872292574].contains(split[0][0].hashCode);
-        if (!skip) {
-          if (bucket != 'main') {
-            apps.add([bucket, app].join('/'));
-            buckets.add(bucket);
-          } else {
-            apps.add(app);
-          }
+
+        if (bucket != 'main') {
+          apps.add([bucket, app].join('/'));
+          buckets.add(bucket);
+        } else {
+          apps.add(app);
         }
       }
     }
@@ -127,9 +155,10 @@ void main(List<String> arguments) async {
       print('Nothing to import.');
     }
   } else {
-    print('WARN: [file] is missing');
+    print('Usage: scoop-import [file|url]');
+    print('WARN: [file|url] is missing');
     print(
-        'ERROR: Cannot find exported file in default locations: .\\$appsListFileName or $appsListFilePath');
-    print('Usage: scoop export > .scoop; Then: scoop-import [file]');
+        'ERROR: Cannot find $appsListFileName file in current folder or in $userHome');
+    print('Example usage: scoop export > .scoop; Then: scoop-import');
   }
 }
