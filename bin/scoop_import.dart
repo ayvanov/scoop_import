@@ -93,8 +93,11 @@ void main(List<String> arguments) async {
         print('ERROR: ${response.reasonPhrase}');
         exit(1);
       }
+      print('Using remote file: ${uri.pathSegments.last}');
       if (response.contentLength! > 0) {
         bytes = response.bodyBytes;
+      } else {
+        print('Remote file is empty.');
       }
     } else {
       file = File(restArgs.first);
@@ -127,10 +130,8 @@ void main(List<String> arguments) async {
     for (var line in lines) {
       final split = line.split(' ');
       if (split.length == 3) {
-        //TODO regexp cleanup
         final bucket = split[2].substring(1, split[2].length - 2);
-        final app = split[0];
-
+        final app = split[0].replaceAll(RegExp('[^a-zA-Z0-9-_]'), '');
         if (bucket != 'main') {
           apps.add([bucket, app].join('/'));
           buckets.add(bucket);
