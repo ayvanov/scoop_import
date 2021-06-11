@@ -1,6 +1,6 @@
 [![Dart](https://github.com/ayvanov/scoop_import/actions/workflows/dart.yml/badge.svg)](https://github.com/ayvanov/scoop_import/actions/workflows/dart.yml)
 
-[Scoop](https://github.com/lukesampson/scoop) "import" command implemented in Dart
+[Scoop](https://github.com/lukesampson/scoop)'s missing "import" command implemented in Dart
 
 # Usage
 
