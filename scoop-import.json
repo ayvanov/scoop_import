@@ -1,13 +1,13 @@
 {
-    "version": "0.1.10",
-    "url": "https://github.com/ayvanov/scoop_import/releases/download/v0.1.10/scoop-import.exe",
+    "version": "0.1.11",
+    "url": "https://github.com/ayvanov/scoop_import/releases/download/v0.1.11/scoop-import.exe",
     "bin": [
         [
             "scoop-import.exe",
             "scoop-import"
         ]
     ],
-    "hash": "a3ada161f35723129a14ba14c28620825b03bbc52c406bff59bc2e2b6a60cc20",
+    "hash": "6bb58819bf4c0cfdb77521f47eb2718e7a959bf000732819c1c7e247f6a6d2c2",
     "homepage": "https://github.com/ayvanov/scoop_import",
     "checkver": "github",
     "description": "Scoop 'import' command implemented in Dart",
