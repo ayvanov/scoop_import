@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:http/http.dart' as http;
 import 'dart:io' show File, Process, ProcessResult, stdout, exit, Platform;
 import 'package:args/args.dart';
@@ -81,7 +79,7 @@ void main(List<String> arguments) async {
   final appsListFilePath = userHome + '\\$appsListFileName';
   var file;
   var fileExists = false;
-  var bytes = Uint8List(0);
+  var lines = <String>[];
   final argParser = ArgParser();
   final restArgs = argParser.parse(arguments).rest;
 
@@ -95,7 +93,15 @@ void main(List<String> arguments) async {
       }
       print('Using remote file: ${uri.pathSegments.last}');
       if (response.contentLength! > 0) {
-        bytes = response.bodyBytes;
+        final contentType = response.headers.entries.singleWhere((element) {
+          return element.key == 'content-type';
+        });
+        if (contentType.value.contains('application/octet-stream')) {
+          lines = String.fromCharCodes(response.bodyBytes.buffer.asUint16List())
+              .split('\n');
+        } else if (contentType.value.contains('text/plain')) {
+          lines = response.body.split('\n');
+        }
       } else {
         print('Remote file is empty.');
       }
@@ -120,21 +126,27 @@ void main(List<String> arguments) async {
       print('Using $appsListFileName file');
     }
   }
-  if (bytes.isEmpty && fileExists) {
-    bytes = file.readAsBytesSync();
+  if (lines.isEmpty && fileExists) {
+    final bytes = file.readAsBytesSync();
+    lines = String.fromCharCodes(bytes.buffer.asUint16List()).split('\n');
   }
-  if (bytes.isNotEmpty) {
+  if (lines.isNotEmpty) {
     final buckets = <String>{};
     final apps = <String>[];
-    final lines = String.fromCharCodes(bytes.buffer.asUint16List()).split('\n');
+
     for (var line in lines) {
       final split = line.split(' ');
       if (split.length == 3) {
-        final bucket = split[2].substring(1, split[2].length - 2);
-        final app = split[0].replaceAll(RegExp('[^a-zA-Z0-9-_]'), '');
+        final bucket = split.last.trim().replaceAll(RegExp('\\[|\\]'), '');
+        var app = split.first.trim().replaceAll(RegExp('[^a-zA-Z0-9-_]'), '');
         if (bucket != 'main') {
-          apps.add([bucket, app].join('/'));
-          buckets.add(bucket);
+          var uri = Uri.parse(bucket);
+          if (['http', 'https'].contains(uri.scheme.toLowerCase())) {
+            apps.add(bucket);
+          } else {
+            apps.add([bucket, app].join('/'));
+            buckets.add(bucket);
+          }
         } else {
           apps.add(app);
         }
