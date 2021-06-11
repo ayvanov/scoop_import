@@ -1,5 +1,5 @@
 {
-    "version": "v0.1.10",
+    "version": "0.1.10",
     "url": "https://github.com/ayvanov/scoop_import/releases/download/v0.1.10/scoop-import.exe",
     "bin": [
         [
@@ -13,6 +13,6 @@
     "description": "Scoop 'import' command implemented in Dart",
     "license": "Apache-2.0",
     "autoupdate": {
-        "url": "https://github.com/ayvanov/scoop_import/releases/download/$version/scoop-import.exe"
+        "url": "https://github.com/ayvanov/scoop_import/releases/download/v$version/scoop-import.exe"
     }
 }
